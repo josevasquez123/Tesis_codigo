@@ -1,65 +1,69 @@
 from psychopy import visual, core
 
-def makeRectang(position, win):
+class stimulus:
+
+    screenWidth = 1536
+    screenHeight = 864
+    posibles_rectangs = ["Primer rectangulo", "Segundo rectangulo", "Tercer rectangulo", "Cuarto rectangulo"]
+    
+
+    def runPrueba(self, startDataAdq, l):
+
+        #Inicializacion de todo los objetos del GUI de los estimulos SSVEP
+        win = visual.Window(color="white", units="pix", size=[stimulus.screenWidth, stimulus.screenHeight], waitBlanking=False)
+        freq_text = visual.TextStim(win=win, text="HOLA", color="black", height=100)
+        win.mouseVisible = False
+        rectang1 = self.makeRectang([-384,216], win)
+        rectang2  = self.makeRectang([384,216], win)
+        rectang3 = self.makeRectang([-384, -216], win)
+        rectang4 = self.makeRectang([384,-216], win)
+
+        #Inicio mostrando el cuadrado que debe ver (la pista)
+        freq_text.draw()
+        win.flip()
+        core.wait(0.9)
+
+        l.acquire()
+        startDataAdq.value = True
+        l.release()
+
+        #CADA LOOPEADA ES 1/60 SEGUNDOS, ENTONCES 240 LOOPS SON 4 SEGUNDOS 
+
+        #Inicia los parpadeos de los 4 rectangulos a las frecuencias definidas
+        for frameN in range(self.tiempo_adquisicion(4)):
+            
+            self.flickStimulusFrequency(10,60,frameN,rectang1)
+            self.flickStimulusFrequency(10,60,frameN,rectang2)
+            self.flickStimulusFrequency(10,60,frameN,rectang3)
+            self.flickStimulusFrequency(10,60,frameN,rectang4)
+
+            self.drawRectangs(rectang1, rectang2, rectang3, rectang4)
+            win.flip(clearBuffer=True)
+
+        core.wait(3)
+
+    def makeRectang(self, position, win):
         rect = visual.Rect(win=win, units="pix", width= 384,height =216, pos=position, fillColor="black")
         return rect
 
-class stimulus:
-
-    """ screenWidth = 1536
-    screenHeight = 864
-    posibles_rectangs = ["Primer rectangulo", "Segundo rectangulo", "Tercer rectangulo", "Cuarto rectangulo"]
-
-    win = visual.Window(color="white", units="pix", size=[screenWidth, screenHeight], waitBlanking=False)
-    freq_text = visual.TextStim(win=win, text="HOLA", color="black", height=100)
-    rectang = makeRectang([-384,216], win)
-    rectang2  = makeRectang([384,216], win)
-    rectang3 = makeRectang([-384, -216], win)
-    rectang4 = makeRectang([384,-216], win)
-
-    win.mouseVisible = False """
-
-    def getFrameRate(self):
-        print(self.win.getActualFrameRate())
-
-    def drawRectangs(self):
-        self.rectang.draw()
-        self.rectang2.draw()
-        self.rectang3.draw()
-        self.rectang4.draw()
+    def drawRectangs(self, rectang1, rectang2, rectang3, rectang4):
+        rectang1.draw()
+        rectang2.draw()
+        rectang3.draw()
+        rectang4.draw()
     
     def opacityRectangs(self, rectangs, opac):
         rectangs.setOpacity(opac)
 
-    def flickStimulusFrequency(self,freq, refresh_rate, frameN, rectangs):
+    def flickStimulusFrequency(self,freq, refresh_rate, frameN, rectangN):
         frame = refresh_rate/freq
         if frameN % frame*2 >= frame:
-            self.opacityRectangs(rectangs,0.0)
+            self.opacityRectangs(rectangN,0.0)
         else:
-            self.opacityRectangs(rectangs,1.0)
+            self.opacityRectangs(rectangN,1.0)
     
     def tiempo_adquisicion(self, tiempo):
         return tiempo*60
-    
-    def runPrueba(self):
-
-        self.freq_text.draw()
-        self.win.flip()
-        core.wait(0.9)
-
-        #CADA LOOPEADA ES 1/60 SEGUNDOS, ENTONCES 240 LOOPS SON 4 SEGUNDOS    
-
-        for frameN in range(self.tiempo_adquisicion(4)):
-            
-            self.flickStimulusFrequency(10,60,frameN,self.rectang)
-            self.flickStimulusFrequency(10,60,frameN,self.rectang2)
-            self.flickStimulusFrequency(10,60,frameN,self.rectang3)
-            self.flickStimulusFrequency(10,60,frameN,self.rectang4)
-
-            self.drawRectangs()
-            self.win.flip(clearBuffer=True)
-
-        core.wait(3)
     
     def runBloque(self):
         for index in range(2):
@@ -75,7 +79,11 @@ class stimulus:
         self.runBloque()
         core.wait(5*60)
         self.runBloque()
+    
+    def getFrameRate(self, win):
+        print(win.getActualFrameRate())
 
 if __name__=="__main__":
-    stimulus()
+    s = stimulus()
+    s.runPrueba()
 
