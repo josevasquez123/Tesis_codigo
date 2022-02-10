@@ -12,6 +12,13 @@ class gtec():
                 ch.NotchFilterIndex = notchIndex
         d.NumberOfScans_calc()
         d.SetConfiguration()
+
+    #BUSCAR LOS INDICES DE LOS CANALES PARA DEFINIRLOS EN EL SUBPLOTS
+    def showAllChannels(d):
+        scope = pygds.Scope(1/d.SamplingRate, subplots={0: 0, 1: 1}, xlabel=(
+        '', 't/s'), ylabel=(u'V/μV', 'DI'), title=('Ch1', 'DI'))
+
+        d.GetData(d.SamplingRate, more=scope)
     
     
 

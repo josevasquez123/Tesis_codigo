@@ -7,16 +7,7 @@ class stimulus:
     posibles_rectangs = ["Primer rectangulo", "Segundo rectangulo", "Tercer rectangulo", "Cuarto rectangulo"]
     
 
-    def runPrueba(self, startDataAdq, l):
-
-        #Inicializacion de todo los objetos del GUI de los estimulos SSVEP
-        win = visual.Window(color="white", units="pix", size=[stimulus.screenWidth, stimulus.screenHeight], waitBlanking=False)
-        freq_text = visual.TextStim(win=win, text="HOLA", color="black", height=100)
-        win.mouseVisible = False
-        rectang1 = self.makeRectang([-384,216], win)
-        rectang2  = self.makeRectang([384,216], win)
-        rectang3 = self.makeRectang([-384, -216], win)
-        rectang4 = self.makeRectang([384,-216], win)
+    def runPrueba(self, win, freq_text, rectang1, rectang2, rectang3, rectang4,startDataAdq, l):
 
         #Inicio mostrando el cuadrado que debe ver (la pista)
         freq_text.draw()
@@ -64,13 +55,24 @@ class stimulus:
     
     def tiempo_adquisicion(self, tiempo):
         return tiempo*60
-    
-    def runBloque(self):
-        for index in range(2):
-            self.freq_text.setText(text=self.posibles_rectangs[index%4])
-            self.runPrueba()
-        self.win.close()
 
+    def runBloque(self, startDataAdq, l, numPruebas):
+
+        #Inicializacion de todo los objetos del GUI de los estimulos SSVEP
+        win = visual.Window(color="white", units="pix", size=[stimulus.screenWidth, stimulus.screenHeight], waitBlanking=False)
+        freq_text = visual.TextStim(win=win, text="", color="black", height=100)
+        win.mouseVisible = False
+        rectang1 = self.makeRectang([-384,216], win)
+        rectang2  = self.makeRectang([384,216], win)
+        rectang3 = self.makeRectang([-384, -216], win)
+        rectang4 = self.makeRectang([384,-216], win)
+
+        for index in range(numPruebas):
+            freq_text.setText(text=stimulus.posibles_rectangs[index%4])
+            self.runPrueba(win, freq_text, rectang1, rectang2, rectang3, rectang4, startDataAdq, l)
+        
+        win.close()
+        
     def runSesion(self):
         self.runBloque()
         core.wait(5*60)
