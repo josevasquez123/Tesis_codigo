@@ -1,7 +1,9 @@
-from msilib.schema import File
 import numpy as np
+from ssvep_paradigm import SSVEP
 
 if __name__=="__main__":
+
+    SSVEP.run()
 
     """ z = np.array([[1,2],[3,4]])
     w = np.array([[5,6],[7,8]])
