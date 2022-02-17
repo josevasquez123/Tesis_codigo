@@ -8,7 +8,9 @@ from numpy import save as saveEEGSignals
 class SSVEP:
     
     #Metodo que obtiene los datos del EEG cuando se activa la bandera startDataAdq
-    def dataAdq(self, startDataAdq, l, d, data):
+    def dataAdq(self, startDataAdq, l):
+
+        x = GDS()
         _startDataAdq = False
 
         #Esperar hasta que la bandera indique el inicio de lectura de datos
@@ -17,13 +19,16 @@ class SSVEP:
             _startDataAdq = startDataAdq.value
             l.release()
         #Inicio de lectura de datos
-        data = d.GetData(d.SamplingRate*4)          #Esto significa leer por 4 segundos
+        data2 = x.GetData(x.SamplingRate*4)          #Esto significa leer por 4 segundos
 
         #Se limpia la bandera
         l.acquire()
         startDataAdq.value = False
         l.release()
-        #playsound('ringtone.mp3')
+
+        filename = 'prueba2.npy'
+        
+        saveEEGSignals(filename, data2)
         
         
     #Metodo que inicia el multiproceso, en el cual se activa el metodo dataAdq y la presentacion de los flickers
@@ -32,8 +37,11 @@ class SSVEP:
         d = GDS()
         gtec.configure_Gusbamp(d, 2400, 11, 148)
 
+        d.Close()
+        del d
+
         #Variable donde se guardara las señales EEG
-        data = []
+        #data = []
 
         #Se crea el mutex
         l = multiprocessing.Lock()
@@ -45,7 +53,7 @@ class SSVEP:
         stim = stimulus.stimulus()
 
         #Se definen los procesos con sus respectivas funciones de inicio y parametros
-        p1 = multiprocessing.Process(target=self.dataAdq, args=[startDataAdq, l, d, data])
+        p1 = multiprocessing.Process(target=self.dataAdq, args=[startDataAdq, l])
         p2 = multiprocessing.Process(target=stim.runBloque, args=[startDataAdq, l, 1])
 
         #Se  inician los procesos
@@ -53,10 +61,7 @@ class SSVEP:
         p2.start()
         p1.join()
         p2.join()
-
-        #Guardar la data
-        filename = 'prueba.npy'
-        saveEEGSignals(filename, data)
+        
 
 if __name__=="__main__":
     s = SSVEP()

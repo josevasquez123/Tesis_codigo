@@ -1,23 +1,33 @@
 import numpy as np
-from ssvep_paradigm import SSVEP
+#from ssvep_paradigm import SSVEP
+import matplotlib.pyplot as plt
+from scipy.fft import fft, fftfreq
 
 if __name__=="__main__":
 
-    SSVEP.run()
+    data = np.load('prueba2.npy')
 
-    """ z = np.array([[1,2],[3,4]])
-    w = np.array([[5,6],[7,8]])
-    #print(z.shape)
-    print(np.concatenate((z,w),axis=0).T) """
+    data = data.T
 
-    filename = "demo_save.npy"
-    dataFile = np.array(np.load(filename))
-    dataResult = dataFile[0]
+    duration = 4
 
-    for index, data in enumerate(dataFile):  
-        if index == 0:
-            pass
-        else:
-            dataResult = np.concatenate((dataResult,data), axis=0)
+    sampleRate = 256
 
-    print(dataResult.T.shape)
+    N = sampleRate * duration
+
+    x = np.linspace(0, duration, N, endpoint=False)
+    
+    #y = np.sin(50.0 * 2.0*np.pi*x) + 0.5*np.sin(80.0 * 2.0*np.pi*x)                #Para verificar que se realizo correctamente el fft
+    #y = data[15]
+
+    yf = fft(y)
+    xf = fftfreq(N, 1 / sampleRate)
+
+    plt.plot(xf, np.abs(yf))
+    plt.show()
+    
+    """ plt.plot(x,y)
+
+    plt.show() """
+
+    #print(y.shape)

@@ -82,10 +82,11 @@ class stimulus:
         core.wait(5*60)
         self.runBloque()
     
-    def getFrameRate(self, win):
+    def getFrameRate(self):
+        win = visual.Window(color="white", units="pix", size=[stimulus.screenWidth, stimulus.screenHeight], waitBlanking=False)
         print(win.getActualFrameRate())
 
 if __name__=="__main__":
     s = stimulus()
-    s.runPrueba()
+    s.getFrameRate()
 
