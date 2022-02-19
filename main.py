@@ -5,11 +5,11 @@ from scipy.fft import fft, fftfreq
 
 if __name__=="__main__":
 
-    data = np.load('prueba2.npy')
+    """ data = np.load('prueba2.npy')
 
     data = data.T
 
-    duration = 4
+    duration = 2
 
     sampleRate = 256
 
@@ -17,17 +17,13 @@ if __name__=="__main__":
 
     x = np.linspace(0, duration, N, endpoint=False)
     
-    #y = np.sin(50.0 * 2.0*np.pi*x) + 0.5*np.sin(80.0 * 2.0*np.pi*x)                #Para verificar que se realizo correctamente el fft
-    #y = data[15]
+    y = np.sin(10.0 * 2.0*np.pi*x) + np.cos(15.0 * 2.0*np.pi*x) + np.sin(10.0 * 4.0*np.pi*x) + np.sin(15.0 * 4.0*np.pi*x)       #Para verificar que se realizo correctamente el fft
+    #y = data[11][3*N:4*N]
 
     yf = fft(y)
     xf = fftfreq(N, 1 / sampleRate)
 
     plt.plot(xf, np.abs(yf))
-    plt.show()
-    
-    """ plt.plot(x,y)
-
     plt.show() """
 
-    #print(y.shape)
+    print(np.zeros(4))
