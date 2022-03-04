@@ -1,3 +1,4 @@
+from datetime import date
 import stimulus
 from pygds import GDS
 from gtec import gtec
@@ -6,11 +7,18 @@ from numpy import save as saveEEGSignals
 
 
 class SSVEP:
+
+    #data=[]
+
+    def __init__(self, name):
+        self.name = name
     
     #Metodo que obtiene los datos del EEG cuando se activa la bandera startDataAdq
     def dataAdq(self, startDataAdq, l):
 
-        x = GDS()
+        d = GDS()
+        gtec.config_usbamp(d)
+
         _startDataAdq = False
 
         #Esperar hasta que la bandera indique el inicio de lectura de datos
@@ -18,30 +26,25 @@ class SSVEP:
             l.acquire()
             _startDataAdq = startDataAdq.value
             l.release()
-        #Inicio de lectura de datos
-        data2 = x.GetData(x.SamplingRate*4)          #Esto significa leer por 4 segundos
+
+        #Obtencion y guardado de lectura de datos
+        data2 = d.GetData(d.SamplingRate*4)          #Esto significa leer por 4 segundos
+        filename = self.name+".npy"
+        saveEEGSignals(filename, data2)
+        """ global data
+        dataTemp = d.GetData(d.SamplingRate*4)          #Esto significa leer por 4 segundos
+        data.append(dataTemp) """
+
+        d.Close()
+        del d
 
         #Se limpia la bandera
         l.acquire()
         startDataAdq.value = False
         l.release()
-
-        filename = 'prueba2.npy'
-        
-        saveEEGSignals(filename, data2)
-        
         
     #Metodo que inicia el multiproceso, en el cual se activa el metodo dataAdq y la presentacion de los flickers
     def run(self):
-        #Envio de la configuracion del GUSBAMP
-        d = GDS()
-        gtec.configure_Gusbamp(d, 2400, 11, 148)
-
-        d.Close()
-        del d
-
-        #Variable donde se guardara las señales EEG
-        #data = []
 
         #Se crea el mutex
         l = multiprocessing.Lock()
@@ -61,8 +64,15 @@ class SSVEP:
         p2.start()
         p1.join()
         p2.join()
+
+        """ #Guardar la data
+        filename = 'prueba' + self.name + '.npy'
+
+        global data
+        
+        saveEEGSignals(filename, data) """
         
 
 if __name__=="__main__":
-    s = SSVEP()
+    s = SSVEP(name='Gary')
     s.run()
