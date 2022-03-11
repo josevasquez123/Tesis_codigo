@@ -74,5 +74,5 @@ class SSVEP:
         
 
 if __name__=="__main__":
-    s = SSVEP(name='Gary')
+    s = SSVEP(name='GaryGa2')
     s.run()
