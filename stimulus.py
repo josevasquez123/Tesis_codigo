@@ -1,92 +1,173 @@
-from psychopy import visual, core
+from numpy import number
+from psychopy.visual import Rect, Window, TextStim
+from psychopy.core import wait
+
+
+#FLICKER 12HZ DEBERIA SALIR 12.5 EN LA PRACTICA
 
 class stimulus:
 
-    screenWidth = 1536
-    screenHeight = 864
+    screenWidth = 1536#1920
+    screenHeight = 864#1080
     posibles_rectangs = ["Primer rectangulo", "Segundo rectangulo", "Tercer rectangulo", "Cuarto rectangulo"]
+    win = None
+    freq_text = None
+    rectang1 = rectang2 = rectang3 = rectang4 = None
+    freqs = [8,10,12,13]
+    
+    def init(self):
+        self.win = Window(color="white", screen=0,units="pix", size=[stimulus.screenWidth, stimulus.screenHeight], waitBlanking=False)
+        self.win.mouseVisible = False
+        self.freq_text = TextStim(win=self.win, text="", color="black", height=100)
+        self.rectang1 = self.makeRectang([-660,350])
+        self.rectang2  = self.makeRectang([660,350])
+        self.rectang3 = self.makeRectang([-660, -350])
+        self.rectang4 = self.makeRectang([660,-350]) 
     
 
-    def runPrueba(self, win, freq_text, rectang1, rectang2, rectang3, rectang4,startDataAdq, l):
+    def makeRectang(self, position):
+        rect = Rect(win=self.win, units="pix", width= 550,height =310, pos=position, fillColor="black")
+        return rect
 
-        #Inicio mostrando el cuadrado que debe ver (la pista)
-        freq_text.draw()
-        win.flip()
-        core.wait(0.9)
+
+    def runPrueba(self,startDataAdq, l, index):
 
         l.acquire()
         startDataAdq.value = True
         l.release()
 
-        #CADA LOOPEADA ES 1/60 SEGUNDOS, ENTONCES 240 LOOPS SON 4 SEGUNDOS 
-
-        #Inicia los parpadeos de los 4 rectangulos a las frecuencias definidas
-        for frameN in range(self.tiempo_adquisicion(4)):
+        for frameN in range(self.tiempo_adquisicion(5)):
             
-            self.flickStimulusFrequency(10,60,frameN,rectang1)
-            self.flickStimulusFrequency(10,60,frameN,rectang2)
-            self.flickStimulusFrequency(10,60,frameN,rectang3)
-            self.flickStimulusFrequency(10,60,frameN,rectang4)
+            self.flickStimulusFrequency(self.freqs[index],frameN, self.rectang1)
+            self.flickStimulusFrequency(self.freqs[index],frameN, self.rectang2)
+            self.flickStimulusFrequency(self.freqs[index],frameN, self.rectang3)
+            self.flickStimulusFrequency(self.freqs[index],frameN, self.rectang4)
 
-            self.drawRectangs(rectang1, rectang2, rectang3, rectang4)
-            win.flip(clearBuffer=True)
+            self.drawRectangs()
+            self.win.flip(clearBuffer=True)
 
-        core.wait(3)
-
-    def makeRectang(self, position, win):
-        rect = visual.Rect(win=win, units="pix", width= 384,height =216, pos=position, fillColor="black")
-        return rect
-
-    def drawRectangs(self, rectang1, rectang2, rectang3, rectang4):
-        rectang1.draw()
-        rectang2.draw()
-        rectang3.draw()
-        rectang4.draw()
+        self.clearRectangs()
+        self.drawRectangs()
+        self.win.flip(clearBuffer=True)
+        wait(4)
     
-    def opacityRectangs(self, rectangs, opac):
-        rectangs.setOpacity(opac)
+    def runPruebaOnline(self,startDataAdq, l):
+        self.freq_text.setText(text="")
+        self.freq_text.draw()
+        self.win.flip()
+        #wait(2)
 
-    def flickStimulusFrequency(self,freq, refresh_rate, frameN, rectangN):
-        frame = refresh_rate/freq
-        if frameN % frame*2 >= frame:
-            self.opacityRectangs(rectangN,0.0)
+        l.acquire()
+        startDataAdq.value = True
+        l.release()
+
+        """ for frameN in range(self.tiempo_adquisicion(5)):
+            
+            self.flickStimulusFrequency(8,frameN, self.rectang1)
+            self.flickStimulusFrequency(10,frameN, self.rectang2)
+            self.flickStimulusFrequency(12,frameN, self.rectang3)
+            self.flickStimulusFrequency(15,frameN, self.rectang4)
+
+            self.drawRectangs()
+            self.win.flip(clearBuffer=True)
+
+        self.clearRectangs()
+        self.drawRectangs()
+        self.win.flip(clearBuffer=True)
+        wait(4) """
+
+    
+    def showText(self, text):
+        self.freq_text.setText(text=text)
+        self.freq_text.draw()
+        self.win.flip()
+        wait(2)
+        self.freq_text.setText(text="")
+        self.freq_text.draw()
+        self.win.flip()
+        wait(1)
+
+    def drawRectangs(self):
+        self.rectang1.draw()
+        self.rectang2.draw()
+        self.rectang3.draw()
+        self.rectang4.draw()
+    
+    def clearRectangs(self):
+        self.rectang1.setOpacity(0.0)
+        self.rectang2.setOpacity(0.0)
+        self.rectang3.setOpacity(0.0)
+        self.rectang4.setOpacity(0.0)
+
+    def flickStimulusFrequency(self,freq, frameN, rectangN):
+        frame = 60/(freq*2)
+        if frameN % (frame*2) >= frame:
+            rectangN.setOpacity(1.0)
         else:
-            self.opacityRectangs(rectangN,1.0)
+            rectangN.setOpacity(0.0)
     
     def tiempo_adquisicion(self, tiempo):
         return tiempo*60
 
     def runBloque(self, startDataAdq, l, numPruebas):
 
-        #Inicializacion de todo los objetos del GUI de los estimulos SSVEP
-        win = visual.Window(color="white", units="pix", size=[stimulus.screenWidth, stimulus.screenHeight], waitBlanking=False)
-        freq_text = visual.TextStim(win=win, text="", color="black", height=100)
-        win.mouseVisible = False
-        rectang1 = self.makeRectang([-384,216], win)
-        rectang2  = self.makeRectang([384,216], win)
-        rectang3 = self.makeRectang([-384, -216], win)
-        rectang4 = self.makeRectang([384,-216], win)
-
         for index in range(numPruebas):
-            freq_text.setText(text=stimulus.posibles_rectangs[index%4])
-            self.runPrueba(win, freq_text, rectang1, rectang2, rectang3, rectang4, startDataAdq, l)
+            self.init()
+            self.showText(stimulus.posibles_rectangs[index%4])
+            self.runPrueba(startDataAdq, l, index%4)
+            self.win.close()
         
-        win.close()
+    def runPruebaEV(self, startDataAdq, l, numPruebas):
+        l.acquire()
+        startDataAdq.value = True
+        l.release()
+
+        """ for index in range(numPruebas):
+            self.init()
+            self.runPruebaOnline(startDataAdq, l)
+            self.win.close() """
         
-    def runSesion(self):
-        self.runBloque()
-        core.wait(5*60)
-        self.runBloque()
-        core.wait(5*60)
-        self.runBloque()
-        core.wait(5*60)
-        self.runBloque()
     
     def getFrameRate(self):
-        win = visual.Window(color="white", units="pix", size=[stimulus.screenWidth, stimulus.screenHeight], waitBlanking=False)
-        print(win.getActualFrameRate())
+        win_frame = Window(color="white", screen=1,units="pix", size=[stimulus.screenWidth, stimulus.screenHeight], waitBlanking=False)
+        print(win_frame.getActualFrameRate())
+    
+    def runTest(self):
+
+        self.init()
+
+        for frameN in range(self.tiempo_adquisicion(10)):
+            
+            self.flickStimulusFrequency(10,frameN, self.rectang1)
+            self.flickStimulusFrequency(10,frameN, self.rectang2)
+            self.flickStimulusFrequency(12,frameN, self.rectang3)
+            self.flickStimulusFrequency(15,frameN, self.rectang4)
+
+            self.drawRectangs()
+            self.win.flip(clearBuffer=True)
+    
+    def runBloqueTest(self):
+        for loop in range(1):
+            self.runTest()
+            wait(2)
+        
+    def checkPositions(self):
+        self.win = Window(color="white", screen=1,units="pix", size=[stimulus.screenWidth, stimulus.screenHeight], waitBlanking=False)
+        self.win.mouseVisible = False
+        self.rectang1 = self.makeRectang([-660,350])
+        self.rectang2  = self.makeRectang([660,350])
+        self.rectang3 = self.makeRectang([-660, -350])
+        self.rectang4 = self.makeRectang([660,-350]) 
+
+        self.rectang1.draw()
+        self.rectang2.draw()
+        self.rectang3.draw()
+        self.rectang4.draw()
+
+        self.win.flip()
+        wait(10)
 
 if __name__=="__main__":
     s = stimulus()
-    s.getFrameRate()
+    s.runTest()
 
