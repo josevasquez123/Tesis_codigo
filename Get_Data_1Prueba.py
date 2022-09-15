@@ -1,11 +1,5 @@
 import pygds
-
 import numpy as np
-
-#d.NumberOfScans_calc() setea el NumberOfScans como 8, tomando en cuenta el SampleRate
-
-#BP Filtro SR: 2400hz, Index: 148, LcutFreq: 0hz, UcutFreq: 30hz
-#N Filtro SR: 2400hz, Index: 11, LcutFreq: 58hz, UcutFreq: 62
 
 def config_usbamp(d, samplingRate= 256,notch_index=-1, BP_index=-1, acquire=1):
     d.Counter = 0

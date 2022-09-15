@@ -1,9 +1,7 @@
-import stimulus
+import Flicker
 from pygds import GDS
 import multiprocessing, ctypes
 import numpy as np
-import os
-
 
 def config_usbamp(d, samplingRate= 256,notch_index=-1, BP_index=-1, acquire=1):
     d.Counter = 0
@@ -61,9 +59,7 @@ class SSVEP:
         del d
 
         #Guardar data
-        cwd = os.getcwd()
-        data_path = cwd + '\\' + 'data_17_06\\'
-        filename = data_path + self.name + ".npy"
+        filename = self.name + ".npy"
         np.save(filename,data)
         
     #Metodo que inicia el multiproceso, en el cual se activa el metodo dataAdq y la presentacion de los flickers
@@ -76,7 +72,7 @@ class SSVEP:
         startDataAdq = multiprocessing.Value(ctypes.c_int,0)
 
         #Se crea el objeto que contiene la presentacion de los flickers
-        stim = stimulus.stimulus()
+        stim = Flicker.stimulus()
         n_pruebas = 4
 
         #Se definen los procesos con sus respectivas funciones de inicio y parametros

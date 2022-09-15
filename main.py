@@ -2,11 +2,8 @@ import socket
 from pygds import GDS
 import multiprocessing, ctypes
 import signal_processing
-import stimulus
+import Flicker
 import time
-import time
-import numpy as np
-import os
 
 def config_usbamp(d, samplingRate= 256,notch_index=-1, BP_index=-1, acquire=1):
     d.Counter = 0
@@ -41,7 +38,7 @@ class BCI:
         _startDataAdq = False
 
         data = []
-
+        
         for loops in range(n_pruebas):
             #Esperar hasta que la bandera indique el inicio de lectura de datos
             while _startDataAdq==False:
@@ -79,6 +76,7 @@ class BCI:
         #np.save(filename,data)
 
 
+    #INICIA COMUNICACION CON EL EV, ENVIA UN "OK" Y ESPERA QUE EL EV RESPONDA CON OTRO "OK"
     def initSocketConnection(self):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
         port = 1755            
@@ -90,6 +88,8 @@ class BCI:
             if data_serv == "OK":
                 return True
     
+    #ENVIA EL MOVIMIENTO DEL BRAZO DE MANERA DIRECTA, SIN TENER DE VER ESTIMULOS
+    #MOV = MOVIMIENTO DEL BRAZO, [1,2,3,4]
     def testEVMovements(self, mov):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
         port = 1755            
@@ -97,24 +97,32 @@ class BCI:
         data = f"done,{str(mov)}"
         self.s.send(data.encode())
 
+
+
+    #TIP: BUSCAR MULTIPROCESSING Y ENTENDERLO (ES PARECIDO A LOS THREADS)
+
     def run(self):
         connection_status = False
         while(connection_status==False):
             connection_status = self.initSocketConnection()
         
-        l = multiprocessing.Lock()
+        #SE INICIALIZA LAS VARIABLES NECESARIAS PARA EL MULTIPROCESSING
+        l = multiprocessing.Lock()                                        
 
+        #DATA QUE SERA COMPARTIDA ENTRE LOS MULTIPROCESSINGS
         startDataAdq = multiprocessing.Value(ctypes.c_int,0)
 
-        stim = stimulus.stimulus()
+        #CREO EL OBJETO DE LA CLASE "STIMULUS"
+        stim = Flicker.stimulus()
 
+        #NUMERO DE PRUEBAS QUE SE QUIERA REALIZAR CON EL PACIENTE
         n_pruebas = 1
 
-        #Se definen los procesos con sus respectivas funciones de inicio y parametros
+        #SE DEFINE LOS PROCESOS CON SUS RESPECTIVAS FUNCIONES DE INICIO Y ARGUMENTOS
         p1 = multiprocessing.Process(target=self.dataAdq, args=[startDataAdq, l, n_pruebas, self.s])
         p2 = multiprocessing.Process(target=stim.runPruebaEV, args=[startDataAdq, l,n_pruebas])
 
-        #Se  inician los procesos
+        #SE INICIA LOS PROCESOS
         p1.start()
         p2.start()
         p1.join()

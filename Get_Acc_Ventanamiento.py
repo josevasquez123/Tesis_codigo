@@ -1,10 +1,8 @@
 import signal_processing
-import os
 import numpy as np
 
 if __name__=="__main__":
-    #cwd = os.getcwd()
-    #data_path = cwd + '\\' + 'data_17_06\\'
+    
     data = np.load("all_db.npy")
 
     accs = []
