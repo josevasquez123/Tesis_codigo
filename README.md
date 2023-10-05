@@ -1,2 +1,2 @@
 # Códigos de tesis
-Se guardaran todo los códigos realizados para el desarrollo de tesis 2.
+Código principal sobre la Tesis del control de un brazo robótico virtual mediante el BCI, cualquier duda o pregunta comunicarse con jose.vasquez.a@utec.edu.pe
